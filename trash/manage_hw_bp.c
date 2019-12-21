@@ -1,7 +1,7 @@
-#include <string.h>
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdint.h>
-#define BUFFER_SIZE 100
+
 void padding(){
     int i;
     i += 3;
@@ -69895,34 +69895,47 @@ void padding(){
     printf("this func wouldn't be called\n");
 }
 
-uint64_t getUInt64fromHex(char const *str)
-{
-    uint64_t accumulator = 0;
-    for (size_t i = 0 ; isxdigit((unsigned char)str[i]) ; ++i)
-    {
-        char c = str[i];
-        accumulator *= 16;
-        if (isdigit(c)) /* '0' .. '9'*/
-            accumulator += c - '0';
-        else if (isupper(c)) /* 'A' .. 'F'*/
-            accumulator += c - 'A' + 10;
-        else /* 'a' .. 'f'*/
-            accumulator += c - 'a' + 10;
-
+int hexchar2int(char c){
+    if('0' <= c && c <= '9'){
+        return (c-'0');
     }
-
-    return accumulator;
+    else if('A' <= c && c <= 'F'){
+        return (c-'A'+10);
+    }
+    else if('a' <= c && c <= 'f'){
+        return (c-'a'+10);
+    }
 }
+
+//return length
+int str2inst(char *inst_str, uint8_t *inst){
+    int i = 0;
+    while(inst_str[i] != NULL){
+        //printf("%d %c\n", i, inst_str[i]);
+        int hex = hexchar2int(inst_str[i])*16;
+        hex += hexchar2int(inst_str[i+1]);
+        inst[i/2] = hex;
+        i += 2;
+    }
+    return i/2;
+}
+
 //hw_bp_addr: 要下的硬件断点地址
+//inst: 断点所在的指令内容(大小不要超过8字节)
+//inst_length: 断点所在的指令长度
 //sched: 为1: go_first; 为2: go_second
 //next_bp: 下一条指令地址 
-void manage_bp_hypercall(uint64_t hw_bp_addr, int sched, uint64_t next_bp, int isadd){
+void manage_bp_hypercall(uint64_t hw_bp_addr, uint8_t *inst, uint64_t inst_length, uint64_t sched, uint64_t next_bp){
     uint64_t a = 0x6464646464;  // insert hw_bp here when compling qemu
-    if(isadd){
+    if(inst != NULL){
         printf("called insert_bp_hypercall(uint64_t)\n");
         printf("hw_bp_addr: 0x%llx\n", hw_bp_addr);
         printf("sched: %d\n", sched);
         printf("next_bp: 0x%llx\n", next_bp);
+        printf("inst: ", inst_length);
+        for(int i = 0; i < inst_length; i++)
+            printf("%x ", (uint32_t)inst[i]);
+        printf("\ninst_length: %d\n", inst_length);
     }
     else{
         printf("called remove_bp_hypercall(uint64_t)\n");
@@ -69930,40 +69943,33 @@ void manage_bp_hypercall(uint64_t hw_bp_addr, int sched, uint64_t next_bp, int i
     }
 }
 
-void main(){
-	FILE *fp;
-	char buffer[BUFFER_SIZE];
-	fp = fopen("input.txt", "r");	//打开输入文件
-	//input.txt: 
-	//1 	(add bp)
-	//400b1a 1 400b21	(hw_bp_addr sched next_bp)
-	//2 	(remove bp)
-	//400b1a		(hw_bp)
-	while(!feof(fp)){
-		fgets(buffer, BUFFER_SIZE, fp);
-		buffer[strlen(buffer)-1] = NULL;
-		printf("%s\n",buffer);
-		if(strcmp(buffer, "1") == 0){	//插入断点
-			uint64_t hw_bp_addr;
-			uint64_t next_bp;
-			int sched;
-			fgets(buffer, BUFFER_SIZE, fp);
-			buffer[strlen(buffer)-1] = NULL;
-			char* p = strtok(buffer, " ");
-			hw_bp_addr = getUInt64fromHex(p);
-			p = strtok(NULL, " ");
-			sched = atoi(p);
-			p = strtok(NULL, " ");
-			next_bp = getUInt64fromHex(p);
-			manage_bp_hypercall(hw_bp_addr, sched, next_bp, 1);
-		}
-		else if(strcmp(buffer, "2") == 0){	//删除断点
-			uint64_t hw_bp_addr;
-			fgets(buffer, BUFFER_SIZE, fp);
-			buffer[strlen(buffer)-1] = NULL;
-			hw_bp_addr = getUInt64fromHex(buffer);
-			manage_bp_hypercall(hw_bp_addr, 0, 0, 0);
-		}
-	}
-	fclose(fp);
+void main(){    
+    int command;
+    uint64_t hw_bp_addr;
+    char inst_str[30];
+    uint8_t inst[8];
+    uint64_t inst_length;
+    uint64_t sched; 
+    uint64_t next_bp;
+    while(1){
+        printf("input=> (insert: 1 remove: 2 quit: 3)  ");
+        scanf("%d", &command);
+        if(command == 1){
+            printf("input=> (hw_bp_addr sched(1/2) next_bp)  ");
+            scanf("%llx %llx %llx", &hw_bp_addr, &sched, &next_bp);
+            printf("input=> (inst e.g. 0F1A00C0)  ");
+            scanf("%s", inst_str);
+            inst_length = str2inst(inst_str, inst);
+            manage_bp_hypercall(hw_bp_addr, inst, inst_length, sched, next_bp);
+        }
+        else if(command == 2){
+            printf("input=> (hw_bp_addr)  ");
+            scanf("%llx", &hw_bp_addr);
+            manage_bp_hypercall(hw_bp_addr, NULL, 0, 0, 0);
+        }
+        else{
+            printf("quit\n");
+            return;
+        }
+    }
 }
