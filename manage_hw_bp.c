@@ -25,13 +25,14 @@ uint64_t getUInt64fromHex(char const *str)
 //hw_bp_addr: 要下的硬件断点地址
 //sched: 为1: go_first; 为2: go_second
 //next_bp: 下一条指令地址 
-void manage_bp_hypercall(uint64_t hw_bp_addr, uint64_t sched, uint64_t next_bp, uint64_t isadd){
+void manage_bp_hypercall(uint64_t hw_bp_addr, uint64_t next_bp, uint64_t sched, uint64_t CPU_index, uint64_t isadd){
     uint64_t a = 0x6464646464;  // insert hw_bp here when compling qemu
     if(isadd){
         printf("called insert_bp_hypercall(uint64_t)\n");
         printf("hw_bp_addr: 0x%llx\n", hw_bp_addr);
-        printf("sched: %d\n", sched);
         printf("next_bp: 0x%llx\n", next_bp);
+        printf("sched: %d\n", sched);
+        printf("CPU_index: 0x%llx\n", CPU_index);
     }
     else{
         printf("called remove_bp_hypercall(uint64_t)\n");
@@ -56,22 +57,25 @@ void main(){
 			uint64_t hw_bp_addr;
 			uint64_t next_bp;
 			uint64_t sched;
+			uint64_t CPU_index;
 			fgets(buffer, BUFFER_SIZE, fp);
 			buffer[strlen(buffer)-1] = NULL;
 			char* p = strtok(buffer, " ");
 			hw_bp_addr = getUInt64fromHex(p);
 			p = strtok(NULL, " ");
+			next_bp = getUInt64fromHex(p);
+			p = strtok(NULL, " ");
 			sched = atoi(p);
 			p = strtok(NULL, " ");
-			next_bp = getUInt64fromHex(p);
-			manage_bp_hypercall(hw_bp_addr, sched, next_bp, 1);
+			CPU_index = atoi(p);
+			manage_bp_hypercall(hw_bp_addr, next_bp, sched, CPU_index, 1);
 		}
 		else if(strcmp(buffer, "2") == 0){	//删除断点
 			uint64_t hw_bp_addr;
 			fgets(buffer, BUFFER_SIZE, fp);
 			buffer[strlen(buffer)-1] = NULL;
 			hw_bp_addr = getUInt64fromHex(buffer);
-			manage_bp_hypercall(hw_bp_addr, 0, 0, 0);
+			manage_bp_hypercall(hw_bp_addr, 0, 0, 0, 0);
 		}
 		printf("\n");
 	}
