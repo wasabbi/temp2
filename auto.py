@@ -3,15 +3,17 @@ import os
 
 target = "./test_scheduling"
 
-thread1_addr = 0x12345876	# bind to CPU0
-thread2_addr = 0x123458c1	# bind to CPU1
+#thread_function_addr
+thread1_addr = 0x12345767	# bind to CPU0
+thread2_addr = 0x123457d7	# bind to CPU1
 
+
+# hw_bp next_bp sched CPU_index
 manage_hw_bp_input = """1
 123457ac 123457b2 2 0
 1
 1234581c 12345822 1 1
 3"""
-# hw_bp next_bp sched CPU_index
 #notice: CPU_index should be responding to the binding CPU of thread1/thread2
 
 
