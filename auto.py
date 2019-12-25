@@ -7,7 +7,7 @@ thread1_addr = 0x12345876
 thread2_addr = 0x123458c1
 
 manage_hw_bp_input = """1
-12345123 2 123457b2
+123457ac 2 123457b2
 1
 1234581c 1 12345822
 3"""
