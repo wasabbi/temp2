@@ -14,7 +14,7 @@ manage_hw_bp_input = """1
 1
 1234581c 12345822 1 1
 3"""
-#notice: CPU_index should be responding to the binding CPU of thread1/thread2
+#NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
 
 
 
