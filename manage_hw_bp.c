@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <dlfcn.h>
+#include <pthread.h>
 #define BUFFER_SIZE 100
 
 uint64_t getUInt64fromHex(char const *str)
@@ -63,6 +65,13 @@ void main(){
 			sched = atoi(p);
 			p = strtok(NULL, " ");
 			CPU_index = atoi(p);
+
+			cpu_set_t mask1;
+			CPU_ZERO(&mask1);
+			CPU_SET(CPU_index, &mask1);
+			if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)	//bind the thread to CPUi
+				    fprintf(stderr,"set thread affinity failed\n");
+
 			manage_bp_hypercall(hw_bp_addr, sched, CPU_index, 1);
 		}
 		else if(strcmp(buffer, "2") == 0){	//删除断点

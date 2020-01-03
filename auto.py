@@ -8,7 +8,7 @@ thread1_addr = 0x12345767	# bind to CPU0
 thread2_addr = 0x123457d7	# bind to CPU1
 
 
-# hw_bp next_bp sched CPU_index
+# hw_bp sched CPU_index
 manage_hw_bp_input = """1
 123457ac 2 0
 1
