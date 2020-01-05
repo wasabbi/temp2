@@ -26,23 +26,34 @@ uint64_t getUInt64fromHex(char const *str)
 }
 //hw_bp_addr: 要下的硬件断点地址
 //sched: 为1: go_first; 为2: go_second
-void manage_bp_hypercall(uint64_t hw_bp_addr, uint64_t sched, uint64_t CPU_index, uint64_t isadd){
+//type: 为0: 删除 为1: 添加 为2: 管理开始（初始化） 为3： 管理结束
+void manage_bp_hypercall(uint64_t hw_bp_addr, uint64_t sched, uint64_t CPU_index, uint64_t type){
     uint64_t a = 0x6464646464;  // insert hw_bp here when compling qemu
-    if(isadd){
+    if(type == 1){
         printf("called insert_bp_hypercall(uint64_t)\n");
         printf("hw_bp_addr: 0x%llx\n", hw_bp_addr);
         printf("sched: %d\n", sched);
         printf("CPU_index: 0x%llx\n", CPU_index);
     }
-    else{
+    else if(type == 0){
         printf("called remove_bp_hypercall(uint64_t)\n");
         printf("hw_bp_addr: 0x%llx\n", hw_bp_addr);
+    }
+    else if(type == 2){
+        printf("manage_hw_bp started\n");
+    }
+    else if(type == 3){
+        printf("manage_hw_bp ended\n");
     }
 }
 
 void main(){
 	FILE *fp;
 	char buffer[BUFFER_SIZE];
+	
+	//init
+	manage_bp_hypercall(0, 0, 0, 2);
+
 	fp = fopen("input.txt", "r");	//打开输入文件
 	//input.txt: 
 	//1 	(add bp)
@@ -84,4 +95,7 @@ void main(){
 		printf("\n");
 	}
 	fclose(fp);
+
+	//init
+	manage_bp_hypercall(0, 0, 0, 3);
 }
