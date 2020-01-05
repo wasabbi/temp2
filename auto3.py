@@ -1,7 +1,7 @@
 import os
 
 
-target = "./test_scheduling"
+target = "./test_scheduling(not_concurrent)"
 
 #thread_function_addr
 thread1_addr = 0x12345786	# bind to CPU0
