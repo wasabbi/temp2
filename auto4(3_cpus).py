@@ -5,14 +5,17 @@ target = "./test_scheduling\(3_cpus\)"
 
 #thread_function_addr
 thread1_addr = 0x12345786	# bind to CPU0
-thread2_addr = 0x12345866	# bind to CPU1
+thread2_addr = 0x123457dc	# bind to CPU1
+thread3_addr = 0x12345801	# bind to CPU2
 
 
 # hw_bp sched CPU_index
 manage_hw_bp_input = """1
-123457cb 2 0
+123457ba 3 0
 1
-123458ab 1 1
+123457f8 2 1
+1
+12345835 1 2
 3"""
 #NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
 
@@ -43,20 +46,22 @@ thread2_addr = hex(thread2_addr)
 
 data = ''
 
-with open('libhook.c', 'r+') as f:
+with open('libhook(3_cpus).c', 'r+') as f:
     for line in f.readlines():
         if(line.find('void* thread1') == 0):
             line = 'void* thread1 = %s;' % (thread1_addr,) + '\n'
         if(line.find('void* thread2') == 0):
             line = 'void* thread2 = %s;' % (thread2_addr,) + '\n'
+        if(line.find('void* thread3') == 0):
+            line = 'void* thread3 = %s;' % (thread3_addr,) + '\n'
         data += line
 
-with open('libhook.c', 'r+') as f:
+with open('libhook(3_cpus).c', 'r+') as f:
     f.writelines(data)
 f.close()
 
 #        PHASE 1.2: compile libhook.c
-os.system('gcc -shared -fPIC -o libhook.so libhook.c -ldl')
+os.system('gcc -shared -fPIC -o libhook\(3_cpus\).so libhook\(3_cpus\).c -ldl')
 
 
 
@@ -73,7 +78,7 @@ os.system('./manage_hw_bp')
 
 
 #        PHASE 3: insert hw_bps
-os.system('LD_PRELOAD="./libhook.so" %s' % (target,))
+os.system('LD_PRELOAD="./libhook(3_cpus).so" %s' % (target,))
 
 
 
