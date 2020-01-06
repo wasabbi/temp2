@@ -43,6 +43,7 @@ manage_hw_bp_input = """1
 #        PHASE 1.1: modify the thread_addr in libhook.c
 thread1_addr = hex(thread1_addr)
 thread2_addr = hex(thread2_addr)
+thread3_addr = hex(thread3_addr)
 
 data = ''
 
