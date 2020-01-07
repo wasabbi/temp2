@@ -11,9 +11,9 @@ thread3_addr = 0x0	# bind to CPU2
 
 # hw_bp sched CPU_index
 manage_hw_bp_input = """1
-ffffffff81561655 1 0
+ffffffff81561655 2 0
 1
-ffffffff81560c6b 2 1
+ffffffff81560c6b 1 1
 3"""
 #NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
 
