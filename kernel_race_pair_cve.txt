@@ -1,6 +1,7 @@
-[{'rw': u'READ', 'instr_count': 6970116, 'lock': [18446744071588172432L], 'pc': '0xffffffff81561655L', 'arg': [18446612133314586724L], 'tid': 1207}, {'rw': u'WRITE', 'instr_count': 6923028, 'lock': [18446744071588172320L], 'pc': '0xffffffff81560c6bL', 'arg': [18446612133174770476L], 'tid': 1206}]   (很稳)
-[{'rw': u'READ', 'instr_count': 7028550, 'lock': [], 'pc': '0xffffffff8114ae1eL', 'arg': [], 'tid': 1206}, {'rw': u'WRITE', 'instr_count': 6990226, 'lock': [18446744071588172320L], 'pc': '0xffffffff8114b13bL', 'arg': [18446612133102729480L], 'tid': 1207}]  (2/10) 
-[{'rw': u'READ', 'instr_count': 6921072, 'lock': [18446744071588172320L], 'pc': '0xffffffff8120a246L', 'arg': [18446612133174770476L], 'tid': 1206}, {'rw': u'WRITE', 'instr_count': 6992145, 'lock': [18446744071588172272L], 'pc': '0xffffffff810fbb76L', 'arg': [18446744071593552388L], 'tid': 1207}
+32 [{'rw': u'READ', 'instr_count': 6970116, 'lock': [18446744071588172432L], 'pc': '0xffffffff81561655L', 'arg': [18446612133314586724L], 'tid': 1207}, {'rw': u'WRITE', 'instr_count': 6923028, 'lock': [18446744071588172320L], 'pc': '0xffffffff81560c6bL', 'arg': [18446612133174770476L], 'tid': 1206}]   (很稳)
+31 [{'rw': u'READ', 'instr_count': 7028550, 'lock': [], 'pc': '0xffffffff8114ae1eL', 'arg': [], 'tid': 1206}, {'rw': u'WRITE', 'instr_count': 6990226, 'lock': [18446744071588172320L], 'pc': '0xffffffff8114b13bL', 'arg': [18446612133102729480L], 'tid': 1207}]  (2/10) 
+28 [{'rw': u'READ', 'instr_count': 6921072, 'lock': [18446744071588172320L], 'pc': '0xffffffff8120a246L', 'arg': [18446612133174770476L], 'tid': 1206}, {'rw': u'WRITE', 'instr_count': 6992145, 'lock': [18446744071588172272L], 'pc': '0xffffffff810fbb76L', 'arg': [18446744071593552388L], 'tid': 1207}  (0/2)
+34 [{'rw': u'WRITE', 'instr_count': 7014240, 'lock': [], 'pc': '0xffffffff810eff38L', 'arg': [], 'tid': 1207}, {'rw': u'WRITE', 'instr_count': 7039260, 'lock': [18446744071588172272L], 'pc': '0xffffffff810eff8fL', 'arg': [18446612133102729480L, 18446612133161883860L], 'tid': 1206}]
 
 tid: 1206 #0x400e5d	# bind to CPU0 e.g.ffffffff81560c6b 
 tid: 1207 #0x400eac	# bind to CPU1 e.g.ffffffff81561655
