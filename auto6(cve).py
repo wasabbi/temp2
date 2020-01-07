@@ -1,21 +1,19 @@
 import os
 
 
-target = "./test_scheduling\(3bp_in_2threads\)"
+target = "./cve"
 
 #thread_function_addr
-thread1_addr = 0x12345786	# bind to CPU0
-thread2_addr = 0x123457eb	# bind to CPU1
+thread1_addr = 0x400e5d	# bind to CPU0
+thread2_addr = 0x400eac	# bind to CPU1
 thread3_addr = 0x0	# bind to CPU2
 
 
 # hw_bp sched CPU_index
 manage_hw_bp_input = """1
-123457c3 1 0
+ffffffff81561655 1 0
 1
-123457c9 3 0
-1
-123457fe 2 1
+ffffffff81560c6b 2 1
 3"""
 #NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
 
