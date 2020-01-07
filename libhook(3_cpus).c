@@ -54,4 +54,3 @@ int pthread_create(pthread_t *__restrict __newthread,
     
     return ret;
 }
-

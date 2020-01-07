@@ -56,8 +56,9 @@ with open('libhook(3_cpus).c', 'r+') as f:
         if(line.find('void* thread3') == 0):
             line = 'void* thread3 = %s;' % (thread3_addr,) + '\n'
         data += line
+f.close()
 
-with open('libhook(3_cpus).c', 'r+') as f:
+with open('libhook(3_cpus).c', 'w') as f:
     f.writelines(data)
 f.close()
 
