@@ -4,8 +4,8 @@ import os
 target = "./cve"
 
 #thread_function_addr
-thread1_addr = 0x400eac	# bind to CPU0
-thread2_addr = 0x400e5d	# bind to CPU1
+thread1_addr = 0x400e5d	# bind to CPU0
+thread2_addr = 0x400eac	# bind to CPU1
 thread3_addr = 0x0	# bind to CPU2
 
 
