@@ -47,7 +47,7 @@ thread3_addr = hex(thread3_addr)
 
 data = ''
 
-with open('libhook(3_cpus).c', 'r+') as f:
+with open('libhook.c', 'r+') as f:
     for line in f.readlines():
         if(line.find('void* thread1') == 0):
             line = 'void* thread1 = %s;' % (thread1_addr,) + '\n'
@@ -58,12 +58,12 @@ with open('libhook(3_cpus).c', 'r+') as f:
         data += line
 f.close()
 
-with open('libhook(3_cpus).c', 'w') as f:
+with open('libhook.c', 'w') as f:
     f.writelines(data)
 f.close()
 
 #        PHASE 1.2: compile libhook.c
-os.system('gcc -shared -fPIC -o libhook\(3_cpus\).so libhook\(3_cpus\).c -ldl')
+os.system('gcc -shared -fPIC -o libhook.so libhook.c -ldl')
 
 
 
@@ -80,7 +80,7 @@ os.system('./manage_hw_bp')
 
 
 #        PHASE 3: insert hw_bps
-os.system('LD_PRELOAD="./libhook(3_cpus).so" %s' % (target,))
+os.system('LD_PRELOAD="./libhook.so" %s' % (target,))
 
 
 

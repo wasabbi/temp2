@@ -40,6 +40,7 @@ manage_hw_bp_input = """1
 #        PHASE 1.1: modify the thread_addr in libhook.c
 thread1_addr = hex(thread1_addr)
 thread2_addr = hex(thread2_addr)
+thread3_addr = hex(thread3_addr)
 
 data = ''
 
@@ -49,9 +50,12 @@ with open('libhook.c', 'r+') as f:
             line = 'void* thread1 = %s;' % (thread1_addr,) + '\n'
         if(line.find('void* thread2') == 0):
             line = 'void* thread2 = %s;' % (thread2_addr,) + '\n'
+        if(line.find('void* thread3') == 0):
+            line = 'void* thread3 = %s;' % (thread3_addr,) + '\n'
         data += line
+f.close()
 
-with open('libhook.c', 'r+') as f:
+with open('libhook.c', 'w') as f:
     f.writelines(data)
 f.close()
 
