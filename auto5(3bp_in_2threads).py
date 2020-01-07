@@ -13,7 +13,7 @@ thread3_addr = 0x0	# bind to CPU2
 manage_hw_bp_input = """1
 123457c3 1 0
 1
-123457c9 3 0
+123457cf 3 0
 1
 123457fe 2 1
 3"""
