@@ -6,7 +6,7 @@ target = "./test_scheduling\(long_sleep\)"
 #thread_function_addr
 thread1_addr = 0x12345786	# bind to CPU0
 thread2_addr = 0x123457f6	# bind to CPU1
-
+thread3_addr = 0x0
 
 # hw_bp sched CPU_index
 manage_hw_bp_input = """1

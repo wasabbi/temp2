@@ -6,6 +6,7 @@ target = "./test_scheduling\(not_concurrent\)"
 #thread_function_addr
 thread1_addr = 0x12345786	# bind to CPU0
 thread2_addr = 0x12345866	# bind to CPU1
+thread3_addr = 0x0
 
 
 # hw_bp sched CPU_index
