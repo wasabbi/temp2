@@ -7,9 +7,9 @@
 
 typedef int (*orig_pthread_create_ftype)(pthread_t *, const pthread_attr_t *, void* (void *), void *);
 
-void* thread1 = 0x12345767;
-void* thread2 = 0x123457d7;
-void* thread3 = 0x0;
+void* thread1 = 0x12345786;
+void* thread2 = 0x123457dc;
+void* thread3 = 0x12345801;
 
 int pthread_create(pthread_t *__restrict __newthread,
 			   const pthread_attr_t *__restrict __attr,
@@ -29,13 +29,6 @@ int pthread_create(pthread_t *__restrict __newthread,
             fprintf(stderr,"set thread affinity failed\n");
         printf("Thread1 binds to CPU0\n");
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
-        
-        cpu_set_t mask2;
-        CPU_ZERO(&mask2);
-        CPU_SET(1, &mask2);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU1
-            fprintf(stderr,"set thread affinity failed\n");
-        printf("Caller Thread binds to CPU1\n");
     }
     else if(__start_routine == thread2){
         cpu_set_t mask1;
@@ -45,13 +38,15 @@ int pthread_create(pthread_t *__restrict __newthread,
             fprintf(stderr,"set thread affinity failed\n");
         printf("Thread2 binds to CPU1\n");
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
-        
-        cpu_set_t mask2;
-        CPU_ZERO(&mask2);
-        CPU_SET(0, &mask2);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU0
+    }
+    else if(__start_routine == thread3){
+        cpu_set_t mask1;
+        CPU_ZERO(&mask1);
+        CPU_SET(2, &mask1);
+        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread3 to CPU2
             fprintf(stderr,"set thread affinity failed\n");
-        printf("Caller Thread binds to CPU0\n");
+        printf("Thread3 binds to CPU2\n");
+        ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
     }
     else{
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
@@ -59,4 +54,3 @@ int pthread_create(pthread_t *__restrict __newthread,
     
     return ret;
 }
-
