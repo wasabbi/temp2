@@ -37,12 +37,12 @@ int pthread_create(pthread_t *__restrict __newthread,
         printf("Thread1 binds to CPU0\n");
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
 
-	/*cpu_set_t mask2;
+	cpu_set_t mask2;
         CPU_ZERO(&mask2);
         CPU_SET(2, &mask2);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU1
             fprintf(stderr,"set thread affinity failed\n");
-        printf("Caller Thread binds to CPU2\n");*/
+        printf("Caller Thread binds to CPU2\n");
     }
     else if(__start_routine == thread2){
 	if(flag1 == 0){
@@ -58,12 +58,12 @@ int pthread_create(pthread_t *__restrict __newthread,
         printf("Thread2 binds to CPU1\n");
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
 
-	/*cpu_set_t mask2;
+	cpu_set_t mask2;
         CPU_ZERO(&mask2);
         CPU_SET(2, &mask2);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU1
             fprintf(stderr,"set thread affinity failed\n");
-        printf("Caller Thread binds to CPU2\n");*/
+        printf("Caller Thread binds to CPU2\n");
     }
     else if(__start_routine == thread3){
 	if(flag1 == 0){
