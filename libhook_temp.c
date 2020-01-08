@@ -45,7 +45,7 @@ int pthread_create(pthread_t *__restrict __newthread,
             fprintf(stderr,"set thread affinity failed\n");
         printf("Thread2 binds to CPU1\n");
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
-
+ 
 	cpu_set_t mask2;
         CPU_ZERO(&mask2);
         CPU_SET(2, &mask2);

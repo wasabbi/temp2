@@ -45,7 +45,7 @@ thread3_addr = hex(thread3_addr)
 
 data = ''
 
-with open('libhook.c', 'r+') as f:
+with open('libhook_temp.c', 'r+') as f:
     for line in f.readlines():
         if(line.find('void* thread1') == 0):
             line = 'void* thread1 = %s;' % (thread1_addr,) + '\n'
