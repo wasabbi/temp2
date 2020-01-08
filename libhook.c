@@ -25,9 +25,11 @@ int pthread_create(pthread_t *__restrict __newthread,
 
     if(__start_routine == thread1){
 	if(flag1 == 0){
+		flag1 = 1;
 		printf("./manage_hw_bp has run\n");
 		system("./manage_hw_bp");
-		flag1 = 1;
+	}else{
+		usleep(100000);
 	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
@@ -39,9 +41,11 @@ int pthread_create(pthread_t *__restrict __newthread,
     }
     else if(__start_routine == thread2){
 	if(flag1 == 0){
+		flag1 = 1;
 		printf("./manage_hw_bp has run\n");
 		system("./manage_hw_bp");
-		flag1 = 1;
+	}else{
+		usleep(100000);
 	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
@@ -53,9 +57,11 @@ int pthread_create(pthread_t *__restrict __newthread,
     }
     else if(__start_routine == thread3){
 	if(flag1 == 0){
+		flag1 = 1;
 		printf("./manage_hw_bp has run\n");
 		system("./manage_hw_bp");
-		flag1 = 1;
+	}else{
+		usleep(100000);
 	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
