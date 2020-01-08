@@ -72,12 +72,8 @@ with open('input.txt', 'w+') as f:
     f.write(manage_hw_bp_input)
 f.close()
 
-#        PHASE 2.2: run manage_hw_bp
-os.system('./manage_hw_bp')
 
-
-
-#        PHASE 3: insert hw_bps
+#        PHASE 3: insert hw_bps (PHASE 2.2: run manage_hw_bp (in libhook.so))
 os.system('LD_PRELOAD="./libhook.so" %s' % (target,))
 
 
