@@ -56,12 +56,12 @@ with open('libhook.c', 'r+') as f:
         data += line
 f.close()
 
-with open('libhook.c', 'w') as f:
+with open('libhook_temp.c', 'w') as f:
     f.writelines(data)
 f.close()
 
 #        PHASE 1.2: compile libhook.c
-os.system('gcc -shared -fPIC -o libhook.so libhook.c -ldl')
+os.system('gcc -shared -fPIC -o libhook.so libhook_temp.c -ldl')
 
 
 
