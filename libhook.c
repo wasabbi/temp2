@@ -7,9 +7,11 @@
 
 typedef int (*orig_pthread_create_ftype)(pthread_t *, const pthread_attr_t *, void* (void *), void *);
 
-void* thread1 = 0x400e5d;
-void* thread2 = 0x400eac;
+void* thread1 = 0x12345767;
+void* thread2 = 0x123457d7;
 void* thread3 = 0x0;
+
+static int flag1 = 0;
 
 int pthread_create(pthread_t *__restrict __newthread,
 			   const pthread_attr_t *__restrict __attr,
@@ -22,6 +24,11 @@ int pthread_create(pthread_t *__restrict __newthread,
     orig_pthread_create = (orig_pthread_create_ftype)dlsym(RTLD_NEXT, "pthread_create");
 
     if(__start_routine == thread1){
+	if(flag1 == 0){
+		printf("./manage_hw_bp has run\n");
+		system("./manage_hw_bp");
+		flag1 = 1;
+	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
         CPU_SET(0, &mask1);
@@ -31,6 +38,11 @@ int pthread_create(pthread_t *__restrict __newthread,
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
     }
     else if(__start_routine == thread2){
+	if(flag1 == 0){
+		printf("./manage_hw_bp has run\n");
+		system("./manage_hw_bp");
+		flag1 = 1;
+	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
         CPU_SET(1, &mask1);
@@ -40,6 +52,11 @@ int pthread_create(pthread_t *__restrict __newthread,
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
     }
     else if(__start_routine == thread3){
+	if(flag1 == 0){
+		printf("./manage_hw_bp has run\n");
+		system("./manage_hw_bp");
+		flag1 = 1;
+	}
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
         CPU_SET(2, &mask1);
