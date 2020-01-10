@@ -2,9 +2,12 @@
 
 
 #include <stdio.h>
+#include <stdint.h>
+#include <string.h>
 #include <dlfcn.h>
 #include <pthread.h>
 #include <sys/syscall.h>
+#include <sys/mman.h>
 
 typedef int (*orig_pthread_create_ftype)(pthread_t *, const pthread_attr_t *, void* (void *), void *);
 
@@ -13,6 +16,95 @@ void* thread2 = 0x123457d7;
 void* thread3 = 0x0;
 
 static int flag1 = 0;
+
+uint64_t getUInt64fromHex(char const *str)
+{
+    uint64_t accumulator = 0;
+    for (size_t i = 0 ; isxdigit((unsigned char)str[i]) ; ++i)
+    {
+        char c = str[i];
+        accumulator *= 16;
+        if (isdigit(c)) /* '0' .. '9'*/
+            accumulator += c - '0';
+        else if (isupper(c)) /* 'A' .. 'F'*/
+            accumulator += c - 'A' + 10;
+        else /* 'a' .. 'f'*/
+            accumulator += c - 'a' + 10;
+
+    }
+
+    return accumulator;
+}
+
+void (*sc)();
+char manage_hw_bp_code[] = 
+"\x48\x8b\x7d\xf8"  //"mov %rdi, [%rbp-0x8]"
+"\x48\x8b\x75\xf0"  //"mov %rsi, [%rbp-0x10]"
+"\x48\x8b\x55\xe8"  //"mov %rdx, [%rbp-0x18]"
+"\x48\x8b\x4d\xe0"  //"mov %rcx, [%rbp-0x20]"
+"\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\xc3"; //bp for manage_hw_bp
+
+void mmap_init(){
+    void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if(ptr == MAP_FAILED)
+    {
+        perror("mmap");
+        exit(-1);
+    }
+    sc = ptr;
+    printf("mmap addr: %x\n", ptr);
+    memcpy(ptr, manage_hw_bp_code, sizeof(manage_hw_bp_code));
+}
+
+void hw_bp_insert(uint64_t hw_bp_addr, uint64_t sched, uint64_t CPU_index, uint64_t type){
+    sc();
+}
+
+void manage_hw_bp(){
+    FILE *fp;
+#define BUFFER_SIZE 100
+    char buffer[BUFFER_SIZE];
+
+    //manage_hw_bp start (init))
+    hw_bp_insert(0, 0, 0, 2);
+
+    fp = fopen("input.txt", "r");	//打开输入文件
+    //input.txt: 
+    //1 	(add bp)
+    //400b1a 1 0	(hw_bp_addr sched CPU_index)
+    //2 	(remove bp)
+    //400b1a		(hw_bp)
+    while(!feof(fp)){
+        fgets(buffer, BUFFER_SIZE, fp);
+        buffer[strlen(buffer)-1] = NULL;
+        if(strcmp(buffer, "1") == 0){	//插入断点
+            uint64_t hw_bp_addr;
+            uint64_t sched;
+            uint64_t CPU_index;
+            fgets(buffer, BUFFER_SIZE, fp);
+            buffer[strlen(buffer)-1] = NULL;
+            char* p = strtok(buffer, " ");
+            hw_bp_addr = getUInt64fromHex(p);
+            p = strtok(NULL, " ");
+            sched = atoi(p);
+            p = strtok(NULL, " ");
+            CPU_index = atoi(p);
+
+            cpu_set_t mask1;
+            CPU_ZERO(&mask1);
+            CPU_SET(CPU_index, &mask1);
+            if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)	//bind the thread to CPUi
+                fprintf(stderr,"set thread affinity failed\n");
+            hw_bp_insert(hw_bp_addr, sched, CPU_index, 1);
+        }
+        printf("\n");
+    }
+    fclose(fp);
+
+    //manage_hw_bp end
+    hw_bp_insert(0, 0, 0, 3);
+}
+
 
 struct mypara{
     void *(*__orig_start_routine) (void *);
@@ -31,8 +123,9 @@ void *transition_func(void *arg){
     printf("[libhook.so] child pthread_self= %u\n", (unsigned int)pthread_self());    
 
     if(__orig_start_routine == thread1){
+        mmap_init();
         printf("[libhook.so] manage_hw_bp has run\n");
-        system("./manage_hw_bp");
+        manage_hw_bp();
         printf("[libhook.so] manage_hw_bp has ended\n");
         flag1 = 1;
     }
