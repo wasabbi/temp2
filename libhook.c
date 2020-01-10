@@ -86,10 +86,10 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread1: child pthread_self= %u\n", (unsigned int)pthread_self());   
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[0].CPU_index+1, &mask1);
+        CPU_SET(hw_bps[0].CPU_index, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            printf(stderr,"set thread affinity failed\n");
- 
+            printf("set thread affinity failed\n");
+        printf("Thread1: %d\n", hw_bps[0].CPU_index);
         init();
         hw_bp_insert(0, 0, 0, 2);
         wait_init = 0;
@@ -104,9 +104,10 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread2: child pthread_self= %u\n", (unsigned int)pthread_self());
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[1].CPU_index+1, &mask1);
+        CPU_SET(hw_bps[1].CPU_index, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            printf(stderr,"set thread affinity failed\n");
+            printf("set thread affinity failed\n");
+        printf("Thread2: %d\n", hw_bps[1].CPU_index);
 
         while(wait_init == 1){ }
         hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, hw_bps[1].CPU_index, 1);
@@ -119,9 +120,10 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread3: child pthread_self= %u\n", (unsigned int)pthread_self()); 
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[2].CPU_index+1, &mask1);
+        CPU_SET(hw_bps[2].CPU_index, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            printf(stderr,"set thread affinity failed\n");
+            printf("set thread affinity failed\n");
+        printf("Thread3: %d\n", hw_bps[2].CPU_index);
         
         while(wait_init == 1){ }
         hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, hw_bps[2].CPU_index, 1);
