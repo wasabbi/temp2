@@ -86,14 +86,14 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread1: child pthread_self= %u\n", (unsigned int)pthread_self());   
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[0].CPU_index, &mask1);
+        CPU_SET(0, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
             printf("set thread affinity failed\n");
-        printf("Thread1: %d\n", hw_bps[0].CPU_index);
+        printf("Thread1: %d\n", 0);
         init();
         hw_bp_insert(0, 0, 0, 2);
         wait_init = 0;
-        hw_bp_insert(hw_bps[0].addr, hw_bps[0].sched, hw_bps[0].CPU_index, 1);
+        hw_bp_insert(hw_bps[0].addr, hw_bps[0].sched, 0, 1);
         while(wait_insert_all == 1){ }
         hw_bp_insert(0, 0, 0, 3);
         wait_manage_end = 0;
@@ -104,13 +104,13 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread2: child pthread_self= %u\n", (unsigned int)pthread_self());
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[1].CPU_index, &mask1);
+        CPU_SET(1, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
             printf("set thread affinity failed\n");
-        printf("Thread2: %d\n", hw_bps[1].CPU_index);
+        printf("Thread2: %d\n", 1);
 
         while(wait_init == 1){ }
-        hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, hw_bps[1].CPU_index, 1);
+        hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, 1, 1);
         wait_insert_all = 0;
         while(wait_manage_end == 1) { }
         printf("[libhook.so] Thread2: Transition_func started\n");
@@ -120,13 +120,13 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread3: child pthread_self= %u\n", (unsigned int)pthread_self()); 
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[2].CPU_index, &mask1);
+        CPU_SET(2, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
             printf("set thread affinity failed\n");
-        printf("Thread3: %d\n", hw_bps[2].CPU_index);
+        printf("Thread3: %d\n", 2);
         
         while(wait_init == 1){ }
-        hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, hw_bps[2].CPU_index, 1);
+        hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, 2, 1);
         while(wait_manage_end == 1) { }
         printf("[libhook.so] Thread: Transition_func started\n");
     }
