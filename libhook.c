@@ -15,9 +15,9 @@ static int wait_init = 1;
 static int wait_insert_all = 1;
 static int wait_manage_end = 1;
 
-void* thread1 = 0x12345786;
-void* thread2 = 0x123457dc;
-void* thread3 = 0x12345801;
+void* thread1 = 0x400e5d;
+void* thread2 = 0x400eac;
+void* thread3 = 0x0;
 
 struct hw_bp{
     uint64_t addr;
@@ -42,20 +42,20 @@ char manage_hw_bp_code[] =
 "\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\x90\x90\x90\x90\xc3\x90"; //bp for manage_hw_bp
 
 void init(){
-    hw_bps[0].addr = 0x12345786;
-    hw_bps[0].sched = 3;
+    hw_bps[0].addr = 0x400e5d;
+    hw_bps[0].sched = 1;
     hw_bps[0].CPU_index = 0;
     hw_bps[0].__start_routine = 0x0;
     
-    hw_bps[1].addr = 0x12345801;
+    hw_bps[1].addr = 0x0;
     hw_bps[1].sched = 2;
     hw_bps[1].CPU_index = 1;
-    hw_bps[1].__start_routine = 0x123457dc;
+    hw_bps[1].__start_routine = 0x400eac;
 
     hw_bps[2].addr = 0x0;
-    hw_bps[2].sched = 1;
+    hw_bps[2].sched = -1;
     hw_bps[2].CPU_index = 2;
-    hw_bps[2].__start_routine = 0x12345801;
+    hw_bps[2].__start_routine = 0x0;
 
     void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
     if(ptr == MAP_FAILED)
