@@ -43,7 +43,7 @@ char manage_hw_bp_code[] =
 "\x48\x8b\x75\xf0"  //"mov %rsi, [%rbp-0x10]"
 "\x48\x8b\x55\xe8"  //"mov %rdx, [%rbp-0x18]"
 "\x48\x8b\x4d\xe0"  //"mov %rcx, [%rbp-0x20]"
-"\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\xc3"; //bp for manage_hw_bp
+"\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\x90\x90\x90\x90\xc3\x90"; //bp for manage_hw_bp
 
 void mmap_init(){
     void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
