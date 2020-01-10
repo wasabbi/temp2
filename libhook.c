@@ -16,6 +16,7 @@ void* thread2 = 0x123457d7;
 void* thread3 = 0x0;
 
 static int flag1 = 0;
+static int flag2 = 0;
 
 uint64_t getUInt64fromHex(char const *str)
 {
@@ -128,11 +129,15 @@ void *transition_func(void *arg){
         manage_hw_bp();
         printf("[libhook.so] manage_hw_bp has ended\n");
         flag1 = 1;
+        while(flag2 == 0){
+
+        }
     }
     else if(__orig_start_routine != thread1){
         while(flag1 == 0){
             //wait for manage_hw_bp
         }
+            flag2 = 1;
     }
 
     printf("[libhook.so] Transition_func started\n");
