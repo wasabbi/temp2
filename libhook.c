@@ -47,7 +47,7 @@ void init(){
     hw_bps[0].CPU_index = 0;
     hw_bps[0].__start_routine = 0x0;
     
-    hw_bps[1].addr = 0x0;
+    hw_bps[1].addr = 0x400eac;
     hw_bps[1].sched = 2;
     hw_bps[1].CPU_index = 1;
     hw_bps[1].__start_routine = 0x400eac;
@@ -64,7 +64,7 @@ void init(){
         exit(-1);
     }
     sc = ptr;
-    printf("mmap addr: %x\n", ptr);
+    //printf("mmap addr: %x\n", ptr);
     memcpy(ptr, manage_hw_bp_code, sizeof(manage_hw_bp_code));
 }
 
@@ -86,9 +86,9 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread1: child pthread_self= %u\n", (unsigned int)pthread_self());   
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[0].CPU_index, &mask1);
+        CPU_SET(hw_bps[0].CPU_index+1, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            fprintf(stderr,"set thread affinity failed\n");
+            printf(stderr,"set thread affinity failed\n");
  
         init();
         hw_bp_insert(0, 0, 0, 2);
@@ -104,9 +104,9 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread2: child pthread_self= %u\n", (unsigned int)pthread_self());
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[1].CPU_index, &mask1);
+        CPU_SET(hw_bps[1].CPU_index+1, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            fprintf(stderr,"set thread affinity failed\n");
+            printf(stderr,"set thread affinity failed\n");
 
         while(wait_init == 1){ }
         hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, hw_bps[1].CPU_index, 1);
@@ -119,9 +119,9 @@ void *transition_func(void *arg){
         printf("[libhook.so] Thread3: child pthread_self= %u\n", (unsigned int)pthread_self()); 
         cpu_set_t mask1;
         CPU_ZERO(&mask1);
-        CPU_SET(hw_bps[2].CPU_index, &mask1);
+        CPU_SET(hw_bps[2].CPU_index+1, &mask1);
         if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            fprintf(stderr,"set thread affinity failed\n");
+            printf(stderr,"set thread affinity failed\n");
         
         while(wait_init == 1){ }
         hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, hw_bps[2].CPU_index, 1);
