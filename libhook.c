@@ -33,6 +33,7 @@ void *transition_func(void *arg){
     if(__orig_start_routine == thread1){
         printf("[libhook.so] manage_hw_bp has run\n");
         system("./manage_hw_bp");
+        printf("[libhook.so] manage_hw_bp has ended\n");
         flag1 = 1;
     }
     else if(__orig_start_routine != thread1){
