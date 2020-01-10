@@ -11,31 +11,27 @@
 
 typedef int (*orig_pthread_create_ftype)(pthread_t *, const pthread_attr_t *, void* (void *), void *);
 
-void* thread1 = 0x12345767;
-void* thread2 = 0x123457d7;
-void* thread3 = 0x0;
+static int wait_init = 1;
+static int wait_insert_all = 1;
+static int wait_manage_end = 1;
 
-static int flag1 = 0;
-static int flag2 = 0;
+void* thread1 = 0x12345786;
+void* thread2 = 0x123457dc;
+void* thread3 = 0x12345801;
 
-uint64_t getUInt64fromHex(char const *str)
-{
-    uint64_t accumulator = 0;
-    for (size_t i = 0 ; isxdigit((unsigned char)str[i]) ; ++i)
-    {
-        char c = str[i];
-        accumulator *= 16;
-        if (isdigit(c)) /* '0' .. '9'*/
-            accumulator += c - '0';
-        else if (isupper(c)) /* 'A' .. 'F'*/
-            accumulator += c - 'A' + 10;
-        else /* 'a' .. 'f'*/
-            accumulator += c - 'a' + 10;
+struct hw_bp{
+    uint64_t addr;
+    uint64_t sched;
+    uint64_t CPU_index;
+    uint64_t __start_routine;
+};
 
-    }
+struct hw_bp hw_bps[4];
 
-    return accumulator;
-}
+struct mypara{
+    void *(*__orig_start_routine) (void *);
+    void *__orig_arg;
+};
 
 void (*sc)();
 char manage_hw_bp_code[] = 
@@ -45,7 +41,22 @@ char manage_hw_bp_code[] =
 "\x48\x8b\x4d\xe0"  //"mov %rcx, [%rbp-0x20]"
 "\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\x90\x90\x90\x90\xc3\x90"; //bp for manage_hw_bp
 
-void mmap_init(){
+void init(){
+    hw_bps[0].addr = 0x12345786;
+    hw_bps[0].sched = 3;
+    hw_bps[0].CPU_index = 0;
+    hw_bps[0].__start_routine = 0x0;
+    
+    hw_bps[1].addr = 0x12345801;
+    hw_bps[1].sched = 2;
+    hw_bps[1].CPU_index = 1;
+    hw_bps[1].__start_routine = 0x123457dc;
+
+    hw_bps[2].addr = 0x0;
+    hw_bps[2].sched = 1;
+    hw_bps[2].CPU_index = 2;
+    hw_bps[2].__start_routine = 0x12345801;
+
     void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
     if(ptr == MAP_FAILED)
     {
@@ -61,56 +72,6 @@ void hw_bp_insert(uint64_t hw_bp_addr, uint64_t sched, uint64_t CPU_index, uint6
     sc();
 }
 
-void manage_hw_bp(){
-    FILE *fp;
-#define BUFFER_SIZE 100
-    char buffer[BUFFER_SIZE];
-
-    //manage_hw_bp start (init))
-    hw_bp_insert(0, 0, 0, 2);
-
-    fp = fopen("input.txt", "r");	//打开输入文件
-    //input.txt: 
-    //1 	(add bp)
-    //400b1a 1 0	(hw_bp_addr sched CPU_index)
-    //2 	(remove bp)
-    //400b1a		(hw_bp)
-    while(!feof(fp)){
-        fgets(buffer, BUFFER_SIZE, fp);
-        buffer[strlen(buffer)-1] = NULL;
-        if(strcmp(buffer, "1") == 0){	//插入断点
-            uint64_t hw_bp_addr;
-            uint64_t sched;
-            uint64_t CPU_index;
-            fgets(buffer, BUFFER_SIZE, fp);
-            buffer[strlen(buffer)-1] = NULL;
-            char* p = strtok(buffer, " ");
-            hw_bp_addr = getUInt64fromHex(p);
-            p = strtok(NULL, " ");
-            sched = atoi(p);
-            p = strtok(NULL, " ");
-            CPU_index = atoi(p);
-
-            cpu_set_t mask1;
-            CPU_ZERO(&mask1);
-            CPU_SET(CPU_index, &mask1);
-            if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)	//bind the thread to CPUi
-                fprintf(stderr,"set thread affinity failed\n");
-            hw_bp_insert(hw_bp_addr, sched, CPU_index, 1);
-        }
-    }
-    fclose(fp);
-
-    //manage_hw_bp end
-    hw_bp_insert(0, 0, 0, 3);
-}
-
-
-struct mypara{
-    void *(*__orig_start_routine) (void *);
-    void *__orig_arg;
-};
-
 void *transition_func(void *arg){
     void *(*__orig_start_routine) (void *);
     void *__orig_arg;
@@ -119,28 +80,54 @@ void *transition_func(void *arg){
     __orig_start_routine = mp->__orig_start_routine;
     __orig_arg = mp->__orig_arg;
 
-    printf("[libhook.so] child gettid = %u\n", syscall(SYS_gettid));  
-    printf("[libhook.so] child pthread_self= %u\n", (unsigned int)pthread_self());    
 
     if(__orig_start_routine == thread1){
-        mmap_init();
-        printf("[libhook.so] manage_hw_bp has run\n");
-        manage_hw_bp();
-        printf("[libhook.so] manage_hw_bp has ended\n");
-        flag1 = 1;
-        while(flag2 == 0){
-
-        }
-        printf("[libhook.so] Transition_func (Thread1)started\n");
+        printf("[libhook.so] Thread1: child gettid = %u \n", syscall(SYS_gettid));  
+        printf("[libhook.so] Thread1: child pthread_self= %u\n", (unsigned int)pthread_self());   
+        cpu_set_t mask1;
+        CPU_ZERO(&mask1);
+        CPU_SET(hw_bps[0].CPU_index, &mask1);
+        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
+            fprintf(stderr,"set thread affinity failed\n");
+ 
+        init();
+        hw_bp_insert(0, 0, 0, 2);
+        wait_init = 0;
+        hw_bp_insert(hw_bps[0].addr, hw_bps[0].sched, hw_bps[0].CPU_index, 1);
+        while(wait_insert_all == 1){ }
+        hw_bp_insert(0, 0, 0, 3);
+        wait_manage_end = 0;
+        printf("[libhook.so] Thread1: Transition_func started\n");
     }
-    else if(__orig_start_routine != thread1){
-        while(flag1 == 0){
-            //wait for manage_hw_bp
-        }
-            flag2 = 1;
-        printf("[libhook.so] Transition_func (Thread2)started\n");
-    }
+    else if(__orig_start_routine == thread2){
+        printf("[libhook.so] Thread2: child gettid = %u\n", syscall(SYS_gettid));  
+        printf("[libhook.so] Thread2: child pthread_self= %u\n", (unsigned int)pthread_self());
+        cpu_set_t mask1;
+        CPU_ZERO(&mask1);
+        CPU_SET(hw_bps[1].CPU_index, &mask1);
+        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
+            fprintf(stderr,"set thread affinity failed\n");
 
+        while(wait_init == 1){ }
+        hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, hw_bps[1].CPU_index, 1);
+        wait_insert_all = 0;
+        while(wait_manage_end == 1) { }
+        printf("[libhook.so] Thread2: Transition_func started\n");
+    }
+    else if(__orig_start_routine == thread3){
+        printf("[libhook.so] Thread3: child gettid = %u\n", syscall(SYS_gettid));  
+        printf("[libhook.so] Thread3: child pthread_self= %u\n", (unsigned int)pthread_self()); 
+        cpu_set_t mask1;
+        CPU_ZERO(&mask1);
+        CPU_SET(hw_bps[2].CPU_index, &mask1);
+        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
+            fprintf(stderr,"set thread affinity failed\n");
+        
+        while(wait_init == 1){ }
+        hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, hw_bps[2].CPU_index, 1);
+        while(wait_manage_end == 1) { }
+        printf("[libhook.so] Thread: Transition_func started\n");
+    }
     __orig_start_routine(__orig_arg);
     printf("[libhook.so] Transition_func ended\n");
 }
@@ -155,65 +142,11 @@ int pthread_create(pthread_t *__restrict __newthread,
     orig_pthread_create_ftype orig_pthread_create;
     orig_pthread_create = (orig_pthread_create_ftype)dlsym(RTLD_NEXT, "pthread_create");
 
-    if(__start_routine == thread1){
-        cpu_set_t mask1;
-        CPU_ZERO(&mask1);
-        CPU_SET(0, &mask1);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread1 to CPU0
-            fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Thread1 binds to CPU0\n");
-
-        struct mypara mp;
-        mp.__orig_start_routine = __start_routine;
-        mp.__orig_arg = __arg;
-        ret = (*orig_pthread_create)(__newthread, __attr, transition_func, &mp);
-
-        cpu_set_t mask2;
-        CPU_ZERO(&mask2);
-        CPU_SET(3, &mask2);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU3
-            fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Caller Thread binds to CPU3\n");
-    }
-    else if(__start_routine == thread2){
-        cpu_set_t mask1;
-        CPU_ZERO(&mask1);
-        CPU_SET(1, &mask1);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread2 to CPU1
-            fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Thread2 binds to CPU1\n");
-
-        struct mypara mp;
-        mp.__orig_start_routine = __start_routine;
-        mp.__orig_arg = __arg;
-        ret = (*orig_pthread_create)(__newthread, __attr, transition_func, &mp);
-
-        cpu_set_t mask2;
-        CPU_ZERO(&mask2);
-        CPU_SET(3, &mask2);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU3
-            fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Caller Thread binds to CPU3\n");
-    }
-    else if(__start_routine == thread3){
-        cpu_set_t mask1;
-        CPU_ZERO(&mask1);
-        CPU_SET(2, &mask1);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask1),&mask1) < 0)                  //bind the thread3 to CPU2
-        fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Thread3 binds to CPU2\n");
-        
-        struct mypara mp;
-        mp.__orig_start_routine = __start_routine;
-        mp.__orig_arg = __arg;
-        ret = (*orig_pthread_create)(__newthread, __attr, transition_func, &mp);
-
-        cpu_set_t mask2;
-        CPU_ZERO(&mask2);
-        CPU_SET(3, &mask2);
-        if (pthread_setaffinity_np(pthread_self(),sizeof(mask2),&mask2) < 0)                  //bind the caller thread to CPU3
-            fprintf(stderr,"set thread affinity failed\n");
-        //printf("[libhook.so] Caller Thread binds to CPU3\n");
+    if(__start_routine == thread1 || __start_routine == thread2 || __start_routine == thread3){
+        struct mypara *mp = malloc(sizeof(struct mypara));
+        mp->__orig_start_routine = __start_routine;
+        mp->__orig_arg = __arg;
+        ret = (*orig_pthread_create)(__newthread, __attr, transition_func, mp);
     }
     else{
         ret = (*orig_pthread_create)(__newthread, __attr, __start_routine, __arg);
