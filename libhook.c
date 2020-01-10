@@ -98,7 +98,6 @@ void manage_hw_bp(){
                 fprintf(stderr,"set thread affinity failed\n");
             hw_bp_insert(hw_bp_addr, sched, CPU_index, 1);
         }
-        printf("\n");
     }
     fclose(fp);
 
@@ -132,15 +131,16 @@ void *transition_func(void *arg){
         while(flag2 == 0){
 
         }
+        printf("[libhook.so] Transition_func (Thread1)started\n");
     }
     else if(__orig_start_routine != thread1){
         while(flag1 == 0){
             //wait for manage_hw_bp
         }
             flag2 = 1;
+        printf("[libhook.so] Transition_func (Thread2)started\n");
     }
 
-    printf("[libhook.so] Transition_func started\n");
     __orig_start_routine(__orig_arg);
     printf("[libhook.so] Transition_func ended\n");
 }
