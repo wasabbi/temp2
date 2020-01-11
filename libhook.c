@@ -15,8 +15,8 @@ static int wait_init = 1;
 static int wait_insert_all = 1;
 static int wait_manage_end = 1;
 
-void* thread1 = 0x400e5d;
-void* thread2 = 0x400eac;
+void* thread1 = 0x12345767;
+void* thread2 = 0x123457d7;
 void* thread3 = 0x0;
 
 struct hw_bp{
@@ -26,7 +26,7 @@ struct hw_bp{
     uint64_t __start_routine;
 };
 
-struct hw_bp hw_bps[4];
+struct hw_bp *hw_bps[4];
 
 struct mypara{
     void *(*__orig_start_routine) (void *);
@@ -42,20 +42,24 @@ char manage_hw_bp_code[] =
 "\x48\xb8\x64\x64\x64\x64\x64\x00\x00\x00\x90\x90\x90\x90\xc3\x90"; //bp for manage_hw_bp
 
 void init(){
-    hw_bps[0].addr = 0x400e5d;
-    hw_bps[0].sched = 1;
-    hw_bps[0].CPU_index = 0;
-    hw_bps[0].__start_routine = 0x0;
+    int i = 0;
+    for(;i < 3; i++){
+        hw_bps[i] = malloc(sizeof(struct hw_bp));
+    }
+    hw_bps[0]->addr = 0x400e5d;
+    hw_bps[0]->sched = 1;
+    hw_bps[0]->CPU_index = 0;
+    hw_bps[0]->__start_routine = 0x0;
     
-    hw_bps[1].addr = 0x400eac;
-    hw_bps[1].sched = 2;
-    hw_bps[1].CPU_index = 1;
-    hw_bps[1].__start_routine = 0x400eac;
+    hw_bps[1]->addr = 0x400eac;
+    hw_bps[1]->sched = 2;
+    hw_bps[1]->CPU_index = 1;
+    hw_bps[1]->__start_routine = 0x400eac;
 
-    hw_bps[2].addr = 0x0;
-    hw_bps[2].sched = -1;
-    hw_bps[2].CPU_index = 2;
-    hw_bps[2].__start_routine = 0x0;
+    hw_bps[2]->addr = 0x0;
+    hw_bps[2]->sched = -1;
+    hw_bps[2]->CPU_index = 2;
+    hw_bps[2]->__start_routine = 0x0;
 
     void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
     if(ptr == MAP_FAILED)
@@ -93,7 +97,7 @@ void *transition_func(void *arg){
         init();
         hw_bp_insert(0, 0, 0, 2);
         wait_init = 0;
-        hw_bp_insert(hw_bps[0].addr, hw_bps[0].sched, 0, 1);
+        hw_bp_insert(hw_bps[0]->addr, hw_bps[0]->sched, 0, 1);
         while(wait_insert_all == 1){ }
         hw_bp_insert(0, 0, 0, 3);
         wait_manage_end = 0;
@@ -110,7 +114,7 @@ void *transition_func(void *arg){
         printf("Thread2: %d\n", 1);
 
         while(wait_init == 1){ }
-        hw_bp_insert(hw_bps[1].addr, hw_bps[1].sched, 1, 1);
+        hw_bp_insert(hw_bps[1]->addr, hw_bps[1]->sched, 1, 1);
         wait_insert_all = 0;
         while(wait_manage_end == 1) { }
         printf("[libhook.so] Thread2: Transition_func started\n");
@@ -126,7 +130,7 @@ void *transition_func(void *arg){
         printf("Thread3: %d\n", 2);
         
         while(wait_init == 1){ }
-        hw_bp_insert(hw_bps[2].addr, hw_bps[2].sched, 2, 1);
+        hw_bp_insert(hw_bps[2]->addr, hw_bps[2]->sched, 2, 1);
         while(wait_manage_end == 1) { }
         printf("[libhook.so] Thread: Transition_func started\n");
     }
