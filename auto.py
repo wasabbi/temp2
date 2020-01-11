@@ -51,34 +51,34 @@ with open('libhook.c', 'r+') as f:
         if(line.find('void* thread3') == 0):
             line = 'void* thread3 = %s;' % (__start_routine[2],) + '\n'
 
-        if(line.find('    hw_bps[0].addr =') == 0):
-            line = '    hw_bps[0].addr = %s;' % (__start_routine[0],) + '\n'
-        if(line.find('    hw_bps[1].addr =') == 0):
-            line = '    hw_bps[1].addr = %s;' % (__start_routine[1],) + '\n'
-        if(line.find('    hw_bps[2].addr =') == 0):
-            line = '    hw_bps[2].addr = %s;' % (__start_routine[2],) + '\n'
+        if(line.find('    hw_bps[0]->addr =') == 0):
+            line = '    hw_bps[0]->addr = %s;' % (__start_routine[0],) + '\n'
+        if(line.find('    hw_bps[1]->addr =') == 0):
+            line = '    hw_bps[1]->addr = %s;' % (__start_routine[1],) + '\n'
+        if(line.find('    hw_bps[2]->addr =') == 0):
+            line = '    hw_bps[2]->addr = %s;' % (__start_routine[2],) + '\n'
 
-        if(line.find('    hw_bps[0].sched =') == 0):
-            line = '    hw_bps[0].sched = %s;' % (sched[0],) + '\n'
-        if(line.find('    hw_bps[1].sched =') == 0):
-            line = '    hw_bps[1].sched = %s;' % (sched[1],) + '\n'
-        if(line.find('    hw_bps[2].sched =') == 0):
-            line = '    hw_bps[2].sched = %s;' % (sched[2],) + '\n'
+        if(line.find('    hw_bps[0]->sched =') == 0):
+            line = '    hw_bps[0]->sched = %s;' % (sched[0],) + '\n'
+        if(line.find('    hw_bps[1]->sched =') == 0):
+            line = '    hw_bps[1]->sched = %s;' % (sched[1],) + '\n'
+        if(line.find('    hw_bps[2]->sched =') == 0):
+            line = '    hw_bps[2]->sched = %s;' % (sched[2],) + '\n'
 
-        if(line.find('    hw_bps[0].CPU_index =') == 0):
-            line = '    hw_bps[0].CPU_index = %s;' % (CPU_index[0],) + '\n'
-        if(line.find('    hw_bps[1].CPU_index =') == 0):
-            line = '    hw_bps[1].CPU_index = %s;' % (CPU_index[1],) + '\n'
-        if(line.find('    hw_bps[2].CPU_index =') == 0):
-            line = '    hw_bps[2].CPU_index = %s;' % (CPU_index[2],) + '\n'
+        if(line.find('    hw_bps[0]->CPU_index =') == 0):
+            line = '    hw_bps[0]->CPU_index = %s;' % (CPU_index[0],) + '\n'
+        if(line.find('    hw_bps[1]->CPU_index =') == 0):
+            line = '    hw_bps[1]->CPU_index = %s;' % (CPU_index[1],) + '\n'
+        if(line.find('    hw_bps[2]->CPU_index =') == 0):
+            line = '    hw_bps[2]->CPU_index = %s;' % (CPU_index[2],) + '\n'
 
 
-        if(line.find(    'hw_bps[0].__start_routine =') == 0):
-            line = '    hw_bps[0].__start_routine = %s;' % (__start_routine[0],) + '\n'
-        if(line.find('    hw_bps[1].__start_routine =') == 0):
-            line = '    hw_bps[1].__start_routine = %s;' % (__start_routine[1],) + '\n'
-        if(line.find('    hw_bps[2].__start_routine =') == 0):
-            line = '    hw_bps[2].__start_routine = %s;' % (__start_routine[2],) + '\n'
+        if(line.find(    'hw_bps[0]->__start_routine =') == 0):
+            line = '    hw_bps[0]->__start_routine = %s;' % (__start_routine[0],) + '\n'
+        if(line.find('    hw_bps[1]->__start_routine =') == 0):
+            line = '    hw_bps[1]->__start_routine = %s;' % (__start_routine[1],) + '\n'
+        if(line.find('    hw_bps[2]->__start_routine =') == 0):
+            line = '    hw_bps[2]->__start_routine = %s;' % (__start_routine[2],) + '\n'
 
         data += line
 f.close()
