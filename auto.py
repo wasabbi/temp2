@@ -52,11 +52,11 @@ with open('libhook.c', 'r+') as f:
             line = 'void* thread3 = %s;' % (__start_routine[2],) + '\n'
 
         if(line.find('    hw_bps[0]->addr =') == 0):
-            line = '    hw_bps[0]->addr = %s;' % (__start_routine[0],) + '\n'
+            line = '    hw_bps[0]->addr = %s;' % (addr[0],) + '\n'
         if(line.find('    hw_bps[1]->addr =') == 0):
-            line = '    hw_bps[1]->addr = %s;' % (__start_routine[1],) + '\n'
+            line = '    hw_bps[1]->addr = %s;' % (addr[1],) + '\n'
         if(line.find('    hw_bps[2]->addr =') == 0):
-            line = '    hw_bps[2]->addr = %s;' % (__start_routine[2],) + '\n'
+            line = '    hw_bps[2]->addr = %s;' % (addr[2],) + '\n'
 
         if(line.find('    hw_bps[0]->sched =') == 0):
             line = '    hw_bps[0]->sched = %s;' % (sched[0],) + '\n'
