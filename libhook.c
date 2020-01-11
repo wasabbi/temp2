@@ -14,10 +14,12 @@ typedef int (*orig_pthread_create_ftype)(pthread_t *, const pthread_attr_t *, vo
 static int wait_init = 1;
 static int wait_insert_all = 1;
 static int wait_manage_end = 1;
+static int thread_end = 0;
 
-void* thread1 = 0x12345786;
-void* thread2 = 0x123457dc;
-void* thread3 = 0x12345801;
+void* thread1 = 0x12345767;
+void* thread2 = 0x123457d7;
+void* thread3 = 0x0;
+static int thread_num = 0;
 
 struct hw_bp{
     uint64_t addr;
@@ -46,20 +48,22 @@ void init(){
     for(;i < 3; i++){
         hw_bps[i] = malloc(sizeof(struct hw_bp));
     }
-    hw_bps[0]->addr = 0x123457ba;
-    hw_bps[0]->sched = 3;
+    hw_bps[0]->addr = 0x123457ac;
+    hw_bps[0]->sched = 2;
     hw_bps[0]->CPU_index = 0;
     hw_bps[0]->__start_routine = 0x0;
     
-    hw_bps[1]->addr = 0x123457f8;
-    hw_bps[1]->sched = 2;
+    hw_bps[1]->addr = 0x1234581c;
+    hw_bps[1]->sched = 1;
     hw_bps[1]->CPU_index = 1;
-    hw_bps[1]->__start_routine = 0x123457dc;
+    hw_bps[1]->__start_routine = 0x123457d7;
 
-    hw_bps[2]->addr = 0x12345835;
-    hw_bps[2]->sched = 1;
+    hw_bps[2]->addr = 0x0;
+    hw_bps[2]->sched = 0;
     hw_bps[2]->CPU_index = 2;
-    hw_bps[2]->__start_routine = 0x12345801;
+    hw_bps[2]->__start_routine = 0x0;
+
+    thread_num = (thread1 != 0) + (thread2 != 0) + (thread3 != 0);
 
     void *ptr = mmap(0x5ff11000, sizeof(manage_hw_bp_code),PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE, -1, 0);
     if(ptr == MAP_FAILED)
@@ -145,6 +149,8 @@ void *transition_func(void *arg){
     }
     __orig_start_routine(__orig_arg);
     printf("[libhook.so] Transition_func ended\n");
+    thread_end ++;
+    while(thread_end != thread_num) { } // wait to all threads end
 }
 
 int pthread_create(pthread_t *__restrict __newthread,
