@@ -1,17 +1,15 @@
 import os
 
+target = "./test_scheduling\(3bp_in_2threads\)"
 
-target = "./cve"
-
-thread1 = 0x400e5d	#CPU_index is 0
-thread2 = 0x400eac	#CPU_index is 1
+thread1 = 0x12345786	#CPU_index is 0
+thread2 = 0x123457eb	#CPU_index is 1
 thread3 = 0x0	#CPU_index is 2
 
 # hw_bp_addr sched __start_routine
-hw_bp1 = [0xffffffff810eff8f, 1, thread1]	#suggest go_first in thread1
-hw_bp2 = [0xffffffff810eff38, 2, thread2]
-hw_bp3 = [0, 0, 0]
-
+hw_bp1 = [0x123457c3, 1, thread1]	#suggest go_first in thread1
+hw_bp2 = [0x123457c9, 3, thread1]
+hw_bp3 = [0x123457fe, 2, thread2]
 
 
 

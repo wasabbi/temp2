@@ -3,20 +3,14 @@ import os
 
 target = "./cve"
 
-#thread_function_addr
-thread1_addr = 0x400e5d	# bind to CPU0
-thread2_addr = 0x400eac	# bind to CPU1
-thread3_addr = 0x0	# bind to CPU2
+thread1 = 0x400e5d	#CPU_index is 0
+thread2 = 0x400eac	#CPU_index is 1
+thread3 = 0x0	#CPU_index is 2
 
-
-# hw_bp sched CPU_index
-manage_hw_bp_input = """1
-ffffffff8114ae1e 1 0
-1
-ffffffff8114b13b 2 1
-3"""
-#NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
-
+# hw_bp_addr sched __start_routine
+hw_bp1 = [0xffffffff8114ae1e, 2, thread1]	#suggest go_first in thread1
+hw_bp2 = [0xffffffff8114b13b, 1, thread2]
+hw_bp3 = [0, 0, 0]
 
 
 
@@ -39,20 +33,63 @@ ffffffff8114b13b 2 1
 #========The following need not be modified========
 #        PHASE 1: bind thread to CPU
 #        PHASE 1.1: modify the thread_addr in libhook.c
-thread1_addr = hex(thread1_addr)
-thread2_addr = hex(thread2_addr)
-thread3_addr = hex(thread3_addr)
+thread_addr = [hex(thread1), hex(thread2), hex(thread3)]
+
+addr = [hex(hw_bp1[0]), hex(hw_bp2[0]), hex(hw_bp3[0])]
+
+sched = [str(hw_bp1[1]), str(hw_bp2[1]),str(hw_bp3[1])]
+
+__start_routine = [hex(hw_bp1[2]), hex(hw_bp2[2]), hex(hw_bp3[2])]
+
+CPU_index = [0,0,0]
+
+for i in range(3):
+    if(thread_addr[i]==__start_routine[0]):
+        CPU_index[0] = i
+    if(thread_addr[i]==__start_routine[1]):
+        CPU_index[1] = i
+    if(thread_addr[i]==__start_routine[2]):
+        CPU_index[2] = i
 
 data = ''
-
 with open('libhook.c', 'r+') as f:
     for line in f.readlines():
         if(line.find('void* thread1') == 0):
-            line = 'void* thread1 = %s;' % (thread1_addr,) + '\n'
+            line = 'void* thread1 = %s;' % (thread_addr[0],) + '\n'
         if(line.find('void* thread2') == 0):
-            line = 'void* thread2 = %s;' % (thread2_addr,) + '\n'
+            line = 'void* thread2 = %s;' % (thread_addr[1],) + '\n'
         if(line.find('void* thread3') == 0):
-            line = 'void* thread3 = %s;' % (thread3_addr,) + '\n'
+            line = 'void* thread3 = %s;' % (thread_addr[2],) + '\n'
+
+        if(line.find('    hw_bps[0]->addr =') == 0):
+            line = '    hw_bps[0]->addr = %s;' % (addr[0],) + '\n'
+        if(line.find('    hw_bps[1]->addr =') == 0):
+            line = '    hw_bps[1]->addr = %s;' % (addr[1],) + '\n'
+        if(line.find('    hw_bps[2]->addr =') == 0):
+            line = '    hw_bps[2]->addr = %s;' % (addr[2],) + '\n'
+
+        if(line.find('    hw_bps[0]->sched =') == 0):
+            line = '    hw_bps[0]->sched = %s;' % (sched[0],) + '\n'
+        if(line.find('    hw_bps[1]->sched =') == 0):
+            line = '    hw_bps[1]->sched = %s;' % (sched[1],) + '\n'
+        if(line.find('    hw_bps[2]->sched =') == 0):
+            line = '    hw_bps[2]->sched = %s;' % (sched[2],) + '\n'
+
+        if(line.find('    hw_bps[0]->CPU_index =') == 0):
+            line = '    hw_bps[0]->CPU_index = %s;' % (CPU_index[0],) + '\n'
+        if(line.find('    hw_bps[1]->CPU_index =') == 0):
+            line = '    hw_bps[1]->CPU_index = %s;' % (CPU_index[1],) + '\n'
+        if(line.find('    hw_bps[2]->CPU_index =') == 0):
+            line = '    hw_bps[2]->CPU_index = %s;' % (CPU_index[2],) + '\n'
+
+
+        if(line.find(    'hw_bps[0]->__start_routine =') == 0):
+            line = '    hw_bps[0]->__start_routine = %s;' % (__start_routine[0],) + '\n'
+        if(line.find('    hw_bps[1]->__start_routine =') == 0):
+            line = '    hw_bps[1]->__start_routine = %s;' % (__start_routine[1],) + '\n'
+        if(line.find('    hw_bps[2]->__start_routine =') == 0):
+            line = '    hw_bps[2]->__start_routine = %s;' % (__start_routine[2],) + '\n'
+
         data += line
 f.close()
 
@@ -64,19 +101,5 @@ f.close()
 os.system('gcc -shared -fPIC -o libhook.so libhook.c -ldl')
 
 
-
-
-#        PHASE 2: insert hw_bps
-#        PHASE 2.1: create input.txt
-with open('input.txt', 'w+') as f:
-    f.write(manage_hw_bp_input)
-f.close()
-
-
-#        PHASE 3: insert hw_bps (PHASE 2.2: run manage_hw_bp (in libhook.so))
+#        PHASE 2: insert hw_bps & run
 os.system('LD_PRELOAD="./libhook.so" %s' % (target,))
-
-
-
-
-
