@@ -147,7 +147,9 @@ void *transition_func(void *arg){
         while(wait_manage_end == 1) { }
         printf("[libhook.so] Thread3: Transition_func started\n");
     }
+    hw_bp_insert(0, 0, 0, 4);   //start of __start_routine
     __orig_start_routine(__orig_arg);
+    hw_bp_insert(0, 0, 0, 5);   //start of __start_routine
     printf("[libhook.so] Transition_func ended\n");
     thread_end ++;
     while(thread_end != thread_num) { } // wait to all threads end
