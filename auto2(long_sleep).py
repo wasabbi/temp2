@@ -11,7 +11,6 @@ thread3 = 0x0	#CPU_index is 2
 hw_bp1 = [0x123457cb, 2, thread1]	#suggest go_first in thread1
 hw_bp2 = [0x1234583b, 1, thread2]
 hw_bp3 = [0, 0, 0]
-#NOTICE: CPU_index should be responding to the binding CPU of thread1/thread2
 
 
 

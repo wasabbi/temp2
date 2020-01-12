@@ -3,7 +3,6 @@ import os
 
 target = "./cve"
 
-
 thread1 = 0x400e5d	#CPU_index is 0
 thread2 = 0x400eac	#CPU_index is 1
 thread3 = 0x0	#CPU_index is 2

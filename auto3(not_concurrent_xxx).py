@@ -1,6 +1,7 @@
 import os
 
 #this testcase is not effective because pthread_create is not concurrent
+target = "./test_scheduling\(not_concurrent\)"
 
 thread1 = 0x12345786	#CPU_index is 0
 thread2 = 0x12345866	#CPU_index is 1
